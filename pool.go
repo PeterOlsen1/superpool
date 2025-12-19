@@ -5,6 +5,15 @@ func (p *Pool[T]) Add(e T) {
 	p.eventChan <- e
 }
 
+func (p *ReturnPool[T, R]) Add(e T) <-chan R {
+	task := Task[T, R]{
+		Input:  e,
+		Result: make(chan R, 1),
+	}
+	p.eventChan <- task
+	return task.Result
+}
+
 func (p *Pool[T]) Shutdown() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -20,6 +29,13 @@ func (p *Pool[T]) Shutdown() {
 }
 
 func (p *Pool[T]) UpdateEventHandler(f EventHandler[T]) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	p.eventHandler = f
+}
+
+func (p *ReturnPool[T, R]) UpdateEventHandler(f ReturnEventHandler[T, R]) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 

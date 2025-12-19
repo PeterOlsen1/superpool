@@ -3,6 +3,20 @@ package superpool
 import "sync"
 
 type EventHandler[T any] func(T) error
+type ReturnEventHandler[T, R any] func(T) (R, error)
+
+type PoolInterface[T any] interface {
+	Shutdown()
+
+	Add(e T)
+	UpdateEventHandler(f EventHandler[T])
+
+	Resize(newSize uint16)
+	KillN(n uint16)
+
+	Errors()
+	HandleErrors(handler func(error))
+}
 
 type Pool[T any] struct {
 	// The number of workers to be initialized in the pool.
@@ -37,4 +51,16 @@ type Pool[T any] struct {
 	// Channel to quit a certain # of goroutines.
 	// Used in dynamic pool resizing
 	quitChan chan struct{}
+}
+
+type Task[T, R any] struct {
+	Input  T
+	Result chan R
+}
+
+// Default pool implemented with return values
+type ReturnPool[T, R any] struct {
+	Pool[T]
+	eventHandler ReturnEventHandler[T, R]
+	eventChan    chan Task[T, R]
 }
