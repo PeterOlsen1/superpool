@@ -7,7 +7,7 @@ import (
 var count = 0
 
 func TestPool(t *testing.T) {
-	p := setup()
+	p := setup(t)
 
 	p.Add(1)
 	teardown(p)

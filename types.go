@@ -27,4 +27,7 @@ type Pool[T any] struct {
 
 	// wait group to coordinate shutdown of all threads
 	wg sync.WaitGroup
+
+	// Send errors to the user
+	errors chan error
 }

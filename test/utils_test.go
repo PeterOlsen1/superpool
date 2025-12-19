@@ -1,16 +1,21 @@
 package superpool_test
 
 import (
+	"testing"
+
 	sp "github.com/PeterOlsen1/superpool"
 )
 
-func setup() *sp.Pool[int] {
+func setup(t *testing.T) *sp.Pool[int] {
 	handler := func(i int) error {
 		count += 1
 		return nil
 	}
 
-	p := sp.NewPool(10, 2, handler)
+	p, err := sp.NewPool(10, 2, handler)
+	if err != nil {
+		t.Fatal("pool creation failed")
+	}
 	return p
 }
 

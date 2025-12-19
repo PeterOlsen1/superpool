@@ -1,6 +1,12 @@
 package superpool
 
-func NewPool[T any](cap uint32, numWorkers uint16, eventHandler EventHandler[T]) *Pool[T] {
+import "fmt"
+
+func NewPool[T any](cap uint32, numWorkers uint16, eventHandler EventHandler[T]) (*Pool[T], error) {
+	if cap == 0 || numWorkers == 0 {
+		return nil, fmt.Errorf("parameters must be nonzero")
+	}
+
 	pool := Pool[T]{
 		numWorkers:   numWorkers,
 		eventHandler: eventHandler,
@@ -9,11 +15,12 @@ func NewPool[T any](cap uint32, numWorkers uint16, eventHandler EventHandler[T])
 
 	pool.startPool()
 
-	return &pool
+	return &pool, nil
 }
 
 func (p *Pool[T]) startPool() {
 	p.eventChan = make(chan T, p.cap)
+	p.errors = make(chan error)
 
 	// initialize worker threads
 	for range p.numWorkers {
