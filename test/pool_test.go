@@ -6,7 +6,7 @@ import (
 
 var count = 0
 
-func TestPool(t *testing.T) {
+func TestAdd(t *testing.T) {
 	p := setup(t)
 
 	p.Add(1)

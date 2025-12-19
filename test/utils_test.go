@@ -20,5 +20,5 @@ func setup(t *testing.T) *sp.Pool[int] {
 }
 
 func teardown(p *sp.Pool[int]) {
-	p.Close()
+	p.Shutdown()
 }

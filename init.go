@@ -14,13 +14,15 @@ func NewPool[T any](cap uint32, numWorkers uint16, eventHandler EventHandler[T])
 	}
 
 	pool.startPool()
-
 	return &pool, nil
 }
 
 func (p *Pool[T]) startPool() {
 	p.eventChan = make(chan T, p.cap)
 	p.errors = make(chan error)
+
+	// unbuffered, events will be received
+	p.quitChan = make(chan struct{})
 
 	// initialize worker threads
 	for range p.numWorkers {
@@ -32,9 +34,16 @@ func (p *Pool[T]) startWorker() {
 	p.wg.Add(1)
 
 	go func() {
-		for e := range p.eventChan {
-			p.eventHandler(e)
+		for {
+			select {
+			case e := <-p.eventChan:
+				err := p.eventHandler(e)
+				if err != nil {
+					p.errors <- err
+				}
+			case <-p.quitChan:
+				p.wg.Done()
+			}
 		}
-		p.wg.Done()
 	}()
 }

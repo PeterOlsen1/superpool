@@ -28,6 +28,13 @@ type Pool[T any] struct {
 	// wait group to coordinate shutdown of all threads
 	wg sync.WaitGroup
 
+	// Mutex for modifying struct properties
+	mu sync.Mutex
+
 	// Send errors to the user
 	errors chan error
+
+	// Channel to quit a certain # of goroutines.
+	// Used in dynamic pool resizing
+	quitChan chan struct{}
 }
