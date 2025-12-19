@@ -43,10 +43,13 @@ func (p *Pool[T]) startWorker() {
 				}
 			case <-p.quitChan:
 				p.wg.Done()
+				return
 			}
 		}
 	}()
 }
+
+// Duplicate methods for a pool with return values
 
 func NewReturnPool[T, R any](cap uint32, numWorkers uint16, eventHandler ReturnEventHandler[T, R]) (*ReturnPool[T, R], error) {
 	if cap == 0 || numWorkers == 0 {
@@ -88,8 +91,10 @@ func (p *ReturnPool[T, R]) startWorker() {
 				ret, err := p.eventHandler(e.Input)
 				if err != nil {
 					p.errors <- err
+					close(e.Result)
 				} else {
 					e.Result <- ret
+					close(e.Result)
 				}
 			case <-p.quitChan:
 				p.wg.Done()
