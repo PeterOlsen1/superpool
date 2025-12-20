@@ -7,6 +7,7 @@ import (
 )
 
 func setup(t *testing.T) *sp.Pool[int] {
+	count = 0
 	handler := func(i int) error {
 		count += 1
 		return nil
