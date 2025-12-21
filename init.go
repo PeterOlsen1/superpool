@@ -98,6 +98,7 @@ func (p *ReturnPool[T, R]) startWorker() {
 				}
 			case <-p.quitChan:
 				p.wg.Done()
+				return
 			}
 		}
 	}()

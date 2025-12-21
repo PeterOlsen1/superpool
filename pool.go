@@ -28,6 +28,20 @@ func (p *Pool[T]) Shutdown() {
 	close(p.eventChan)
 }
 
+func (p *ReturnPool[T, R]) Shutdown() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	for range p.numWorkers {
+		p.quitChan <- struct{}{}
+	}
+	close(p.errors)
+	p.wg.Wait()
+
+	close(p.quitChan)
+	close(p.eventChan)
+}
+
 func (p *Pool[T]) UpdateEventHandler(f EventHandler[T]) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
