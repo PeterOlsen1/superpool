@@ -31,3 +31,29 @@ func setupCustom(t *testing.T, cap uint32, workers uint16, handler sp.EventHandl
 func teardown(p *sp.Pool[int]) {
 	p.Shutdown()
 }
+
+func teardownReturnPool(p *sp.ReturnPool[int, int]) {
+	p.Shutdown()
+}
+
+func setupReturnPool(t *testing.T) *sp.ReturnPool[int, int] {
+	count = 0
+	handler := func(i int) (int, error) {
+		count += 1
+		return 1, nil
+	}
+
+	p, err := sp.NewReturnPool(10, 2, handler)
+	if err != nil {
+		t.Fatal("pool creation failed")
+	}
+	return p
+}
+
+func setupCustomReturnPool(t *testing.T, cap uint32, workers uint16, handler sp.ReturnEventHandler[int, int]) *sp.ReturnPool[int, int] {
+	p, err := sp.NewReturnPool(cap, workers, handler)
+	if err != nil {
+		t.Fatal("pool creation failed")
+	}
+	return p
+}

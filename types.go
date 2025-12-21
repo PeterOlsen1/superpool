@@ -36,7 +36,7 @@ type Pool[T any] struct {
 	// Should log its own errors
 	eventHandler EventHandler[T]
 
-	// Capacity of the even channel
+	// Capacity of the event channel
 	cap uint32
 
 	// wait group to coordinate shutdown of all threads

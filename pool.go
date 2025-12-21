@@ -62,6 +62,8 @@ func (p *Pool[T]) unsafeKillN(n uint16) {
 	}
 }
 
+// Resizes the current worker pool. If newSize < curSize, kill (cur - new) threads.
+// Else, start (new - cur) threads.
 func (p *Pool[T]) Resize(newSize uint16) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
