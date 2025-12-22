@@ -88,10 +88,10 @@ func (p *Pool[T]) Resize(newSize uint16) {
 	if newSize < p.numWorkers {
 		p.unsafeKillN(p.numWorkers - newSize)
 	} else {
-		p.numWorkers = newSize
 		for range newSize - p.numWorkers {
 			p.startWorker()
 		}
+		p.numWorkers = newSize
 	}
 }
 

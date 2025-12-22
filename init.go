@@ -19,7 +19,7 @@ func NewPool[T any](cap uint32, numWorkers uint16, eventHandler EventHandler[T])
 
 func (p *Pool[T]) startPool() {
 	p.eventChan = make(chan T, p.cap)
-	p.errors = make(chan error)
+	p.errors = make(chan error, 1000)
 
 	// unbuffered, events will be received
 	p.quitChan = make(chan struct{})
@@ -35,11 +35,11 @@ func (p *Pool[T]) startWorker() {
 		for {
 			select {
 			case e := <-p.eventChan:
+				defer p.wg.Done()
 				err := p.eventHandler(e)
 				if err != nil {
 					p.errors <- err
 				}
-				p.wg.Done()
 			case <-p.quitChan:
 				return
 			}
@@ -84,6 +84,7 @@ func (p *ReturnPool[T, R]) startWorker() {
 		for {
 			select {
 			case e := <-p.eventChan:
+				defer p.wg.Done()
 				ret, err := p.eventHandler(e.Input)
 				if err != nil {
 					p.errors <- err
@@ -92,7 +93,6 @@ func (p *ReturnPool[T, R]) startWorker() {
 					e.Result <- ret
 					close(e.Result)
 				}
-				p.wg.Done()
 			case <-p.quitChan:
 				return
 			}
