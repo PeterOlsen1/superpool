@@ -46,3 +46,19 @@ func TestReturnPoolError(t *testing.T) {
 		t.Errorf("the error channel was not signaled twice")
 	}
 }
+
+func TestReturnPoolReturn(t *testing.T) {
+	p := setupReturnPool(t)
+
+	retVal := 0
+	for c := range p.Add(1) {
+		retVal = c
+	}
+
+	if retVal != 1 {
+		t.Errorf("Pool did not return 1")
+	}
+
+	// calls the shutdown method
+	teardownReturnPool(p)
+}
