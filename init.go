@@ -31,8 +31,6 @@ func (p *Pool[T]) startPool() {
 }
 
 func (p *Pool[T]) startWorker() {
-	p.wg.Add(1)
-
 	go func() {
 		for {
 			select {
@@ -41,8 +39,8 @@ func (p *Pool[T]) startWorker() {
 				if err != nil {
 					p.errors <- err
 				}
-			case <-p.quitChan:
 				p.wg.Done()
+			case <-p.quitChan:
 				return
 			}
 		}
@@ -82,8 +80,6 @@ func (p *ReturnPool[T, R]) startPool() {
 }
 
 func (p *ReturnPool[T, R]) startWorker() {
-	p.wg.Add(1)
-
 	go func() {
 		for {
 			select {
@@ -96,8 +92,8 @@ func (p *ReturnPool[T, R]) startWorker() {
 					e.Result <- ret
 					close(e.Result)
 				}
-			case <-p.quitChan:
 				p.wg.Done()
+			case <-p.quitChan:
 				return
 			}
 		}

@@ -2,10 +2,12 @@ package superpool
 
 // Blocks if the eventChan is full
 func (p *Pool[T]) Add(e T) {
+	p.wg.Add(1)
 	p.eventChan <- e
 }
 
 func (p *ReturnPool[T, R]) Add(e T) <-chan R {
+	p.wg.Add(1)
 	task := Task[T, R]{
 		Input:  e,
 		Result: make(chan R, 1),
@@ -28,6 +30,7 @@ func (p *Pool[T]) Shutdown() {
 	close(p.eventChan)
 }
 
+// Needs a separate shutdown method becuase eventChan is different from default pool
 func (p *ReturnPool[T, R]) Shutdown() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -90,4 +93,17 @@ func (p *Pool[T]) Resize(newSize uint16) {
 			p.startWorker()
 		}
 	}
+}
+
+// Waits until all tasks in the pool are completed
+func (p *Pool[T]) Wait() {
+	p.wg.Wait()
+}
+
+func (p *Pool[T]) PendingTasks() int {
+	return len(p.eventChan)
+}
+
+func (p *ReturnPool[T, R]) PendingTasks() int {
+	return len(p.eventChan)
 }

@@ -39,7 +39,7 @@ type Pool[T any] struct {
 	// Capacity of the event channel
 	cap uint32
 
-	// wait group to coordinate shutdown of all threads
+	// wait group for polling if pool is empty
 	wg sync.WaitGroup
 
 	// Mutex for modifying struct properties
@@ -59,6 +59,8 @@ type Task[T, R any] struct {
 }
 
 // Default pool implemented with return values
+//
+// Need to overrite any functions that use eventHandler/Chan
 type ReturnPool[T, R any] struct {
 	Pool[T]
 	eventHandler ReturnEventHandler[T, R]
