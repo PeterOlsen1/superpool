@@ -69,3 +69,33 @@ func TestUpdateEventHandler(t *testing.T) {
 		t.Errorf("count (%d) does not match expected 3", count)
 	}
 }
+
+func TestResize(t *testing.T) {
+	p := setup(t)
+
+	if p.NumWorkers() != 2 {
+		t.Errorf("pool does not have 2 workers")
+	}
+
+	for range 20 {
+		p.Add(1)
+	}
+
+	p.Resize(10)
+
+	if p.NumWorkers() != 10 {
+		t.Errorf("Num workers (%d) does not equal 10", p.NumWorkers())
+	}
+
+	for range 100 {
+		p.Add(1)
+	}
+
+	p.Resize(2)
+
+	if p.NumWorkers() != 2 {
+		t.Errorf("Num workers (%d) does not equal 2", p.NumWorkers())
+	}
+
+	teardown(p)
+}

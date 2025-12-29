@@ -28,7 +28,7 @@ func dummyTask(i int) error {
 	return nil
 }
 
-// BenchmarkPool-16    	      10	 111145265 ns/op	   93129 B/op	     544 allocs/op
+// BenchmarkPool-16           18999             60530 ns/op           20815 B/op        300 allocs/op
 func BenchmarkPool(b *testing.B) {
 	startLocal()
 	defer stopLocal()
@@ -46,7 +46,7 @@ func BenchmarkPool(b *testing.B) {
 	}
 }
 
-// BenchmarkGoroutines-16    	     196	   6082681 ns/op	 1143147 B/op	   20061 allocs/op
+// BenchmarkGoroutines-16    	   19046	     61192 ns/op	   22531 B/op	     401 allocs/op
 func BenchmarkGoroutines(b *testing.B) {
 	startLocal()
 	defer stopLocal()
@@ -65,7 +65,7 @@ func BenchmarkGoroutines(b *testing.B) {
 	}
 }
 
-// BenchmarkSequential-16    	       1	10705755996 ns/op	     176 B/op	       5 allocs/op
+// BenchmarkSequential-16    	   77817	     14602 ns/op	   20801 B/op	     300 allocs/op
 func BenchmarkSequential(b *testing.B) {
 	startLocal()
 	defer stopLocal()
