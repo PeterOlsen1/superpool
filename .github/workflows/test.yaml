@@ -25,4 +25,4 @@ jobs:
               run: go mod tidy
 
             - name: Run tests
-              run: go test ./test -v
+              run: go test -timeout 20s ./test -v
