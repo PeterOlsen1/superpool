@@ -19,6 +19,29 @@ func (p *ReturnPool[T, R]) Add(e T) <-chan R {
 	return task.Result
 }
 
+func (p *Pool[T]) BatchAdd(es []T) {
+	p.wg.Add(len(es))
+	for _, e := range es {
+		p.eventChan <- e
+	}
+}
+
+func (p *ReturnPool[T, R]) BatchAdd(es []T) []<-chan R {
+	p.wg.Add(len(es))
+	ret := make([]<-chan R, len(es))
+
+	for _, e := range es {
+		task := Task[T, R]{
+			Input:  e,
+			Result: make(chan R, 1),
+		}
+		p.eventChan <- task
+		ret = append(ret, task.Result)
+	}
+
+	return ret
+}
+
 func (p *Pool[T]) Shutdown() {
 	p.wg.Wait() // wait for tasks BEFORE killing goroutines
 
