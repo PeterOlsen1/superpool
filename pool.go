@@ -86,7 +86,11 @@ func (p *Pool[T]) unsafeKillN(n uint16) {
 
 // Resizes the current worker pool. If newSize < curSize, kill (cur - new) threads.
 // Else, start (new - cur) threads.
-func (p *Pool[T]) Resize(newSize uint16) {
+func (p *Pool[T]) Resize(newSize uint16) error {
+	if newSize < 1 {
+		return fmt.Errorf("must resize to at least 1 worker")
+	}
+
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -98,6 +102,8 @@ func (p *Pool[T]) Resize(newSize uint16) {
 		}
 		p.numWorkers = newSize
 	}
+
+	return nil
 }
 
 // Waits until all tasks in the pool are completed
@@ -111,4 +117,8 @@ func (p *Pool[T]) PendingTasks() int {
 
 func (p *ReturnPool[T, R]) PendingTasks() int {
 	return len(p.eventChan)
+}
+
+func (p *Pool[T]) NumWorkers() int {
+	return int(p.numWorkers)
 }
