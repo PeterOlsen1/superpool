@@ -1,5 +1,7 @@
 package superpool
 
+import "fmt"
+
 // Blocks if the eventChan is full
 func (p *Pool[T]) Add(e T) {
 	p.wg.Add(1)
@@ -13,10 +15,13 @@ func (p *ReturnPool[T, R]) Add(e T) <-chan R {
 		Result: make(chan R, 1),
 	}
 	p.eventChan <- task
+	fmt.Println("returned")
 	return task.Result
 }
 
 func (p *Pool[T]) Shutdown() {
+	p.wg.Wait() // wait for tasks BEFORE killing goroutines
+
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -24,7 +29,6 @@ func (p *Pool[T]) Shutdown() {
 		p.quitChan <- struct{}{}
 	}
 	close(p.errors)
-	p.wg.Wait()
 
 	close(p.quitChan)
 	close(p.eventChan)
@@ -32,6 +36,8 @@ func (p *Pool[T]) Shutdown() {
 
 // Needs a separate shutdown method becuase eventChan is different from default pool
 func (p *ReturnPool[T, R]) Shutdown() {
+	p.wg.Wait()
+
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -39,7 +45,6 @@ func (p *ReturnPool[T, R]) Shutdown() {
 		p.quitChan <- struct{}{}
 	}
 	close(p.errors)
-	p.wg.Wait()
 
 	close(p.quitChan)
 	close(p.eventChan)

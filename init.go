@@ -32,14 +32,15 @@ func (p *Pool[T]) startPool() {
 
 func (p *Pool[T]) startWorker() {
 	go func() {
+
 		for {
 			select {
 			case e := <-p.eventChan:
-				defer p.wg.Done()
 				err := p.eventHandler(e)
 				if err != nil {
 					p.errors <- err
 				}
+				p.wg.Done()
 			case <-p.quitChan:
 				return
 			}
@@ -84,7 +85,6 @@ func (p *ReturnPool[T, R]) startWorker() {
 		for {
 			select {
 			case e := <-p.eventChan:
-				defer p.wg.Done()
 				ret, err := p.eventHandler(e.Input)
 				if err != nil {
 					p.errors <- err
@@ -93,6 +93,7 @@ func (p *ReturnPool[T, R]) startWorker() {
 					e.Result <- ret
 					close(e.Result)
 				}
+				p.wg.Done()
 			case <-p.quitChan:
 				return
 			}
